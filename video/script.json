@@ -1,0 +1,58 @@
+[
+ {
+  "id": "s1",
+  "title": "The problem",
+  "text": "Millions of small shops already sell with a PayPal button. But AI shopping agents can't really use them. They have to guess their way through buttons and forms. ShopBridge fixes that with one script tag.",
+  "audio": 10.65,
+  "dur": 11.55
+ },
+ {
+  "id": "s2",
+  "title": "Original shop: 0 tools",
+  "text": "Here is Lin's Tea Corner, an ordinary little shop with PayPal checkout. Ask Chrome's WebMCP API for tools on this page, and you get zero.",
+  "audio": 7.99,
+  "dur": 8.89
+ },
+ {
+  "id": "s3",
+  "title": "One script tag: 7 tools",
+  "text": "Now the same page with one ShopBridge script tag. It reads the product data the shop already publishes, and registers seven WebMCP tools: search, product details, cart, checkout, order status, and capture.",
+  "audio": 13.42,
+  "dur": 14.32
+ },
+ {
+  "id": "s4",
+  "title": "Agent-readiness report (AG Grid)",
+  "text": "The readiness report loads both pages live and scores them in AG Grid. The original shop scores forty-five. After conversion, one hundred.",
+  "audio": 8.33,
+  "dur": 9.23
+ },
+ {
+  "id": "s5",
+  "title": "AI agent orders via WebMCP",
+  "text": "Now an AI agent. The request: buy two bags of jasmine tea and one oolong. GLM 4.7 Flash planned these calls, and each one runs as a real WebMCP tool inside the live page. We cut the model's thinking time from this recording. The agent searches, fills the cart, and creates a PayPal sandbox order. It never pays by itself. It hands back an approval link.",
+  "audio": 22.79,
+  "dur": 23.69
+ },
+ {
+  "id": "s6",
+  "title": "Buyer approves in PayPal sandbox",
+  "text": "The human buyer opens that link and approves the payment in the PayPal sandbox, using a test account. Everything in this demo is sandbox. No real money moves.",
+  "audio": 8.93,
+  "dur": 9.83
+ },
+ {
+  "id": "s7",
+  "title": "capture_order \u2192 COMPLETED",
+  "text": "Back in the shop, the order is now approved, so the capture order tool completes it. Status: completed, with a real sandbox capture ID.",
+  "audio": 7.96,
+  "dur": 8.86
+ },
+ {
+  "id": "s8",
+  "title": "Safe by design",
+  "text": "Under the hood, prices are always recomputed on the server from the shop's own catalog, and the PayPal client refuses any non-sandbox host. We built this from the public PayPal and WebMCP specs, without official Store Sync onboarding. Unlike AutoShop, a permission layer for agents, ShopBridge retrofits shops that already use PayPal. The code and live demo are linked below.",
+  "audio": 22.65,
+  "dur": 23.55
+ }
+]

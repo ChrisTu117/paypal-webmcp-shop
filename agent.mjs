@@ -2,12 +2,12 @@
 import { chromium } from 'playwright'; import { createServer } from './server.mjs'; import { toOpenAITools } from './converter/core.mjs';
 import { mockPlanner, openAIPlanner } from './lib/planner.mjs';
 const request = process.argv.slice(2).join(' ') || 'Buy me 2 bags of jasmine tea and one oolong, then give me the PayPal link to pay.';
-const srv = createServer().listen(0); const port = srv.address().port;
+const LIVE = process.env.LIVE?.replace(/\/$/, ''); const srv = LIVE ? null : createServer().listen(0); const SHOP = LIVE || `http://localhost:${srv.address().port}`;
 const browser = await chromium.launch({ executablePath: process.env.CHROME || '/usr/bin/google-chrome', headless: true, args: ['--enable-features=WebMCPTesting'] });
 const page = await browser.newPage(); const cdp = await page.context().newCDPSession(page);
 const cdpTools = []; cdp.on('WebMCP.toolsAdded', e => cdpTools.push(...(e.tools || [])));
 await cdp.send('WebMCP.enable').catch(e => console.log('[cdp] WebMCP.enable failed:', e.message));
-await page.goto(`http://localhost:${port}/`); await page.waitForFunction(() => window.__webmcpShop);
+await page.goto(SHOP + '/'); await page.waitForFunction(() => window.__webmcpShop);
 const tools = await page.evaluate(async () => (await document.modelContext.getTools()).map(t => ({ name: t.name, description: t.description, inputSchema: t.inputSchema })));
 console.log(`[page] ${tools.length} WebMCP tools: ${tools.map(t => t.name).join(', ')}  (CDP toolsAdded saw ${cdpTools.length})`);
 const exec = (name, args) => page.evaluate(async ([n, a]) => { const t = (await document.modelContext.getTools()).find(x => x.name === n); if (!t) return JSON.stringify({ error: 'no tool ' + n });
@@ -26,5 +26,6 @@ for (let step = 0; step < 12 && !final; step++) {
     console.log(`[tool] ${c.function.name}(${JSON.stringify(args)}) -> ${out.slice(0, 300)}`); messages.push({ role: 'tool', tool_call_id: c.id, content: out }); }
 }
 console.log('[agent final]', final);
+import('node:fs').then(fs => fs.writeFileSync('out/agent-transcript.json', JSON.stringify({ planner: planner.name, request, at: new Date().toISOString(), messages }, null, 1)));
 await page.screenshot({ path: 'out/shop-after-agent.png', fullPage: true });
-await browser.close(); srv.close();
+await browser.close(); srv?.close();

@@ -4,3 +4,8 @@ _scratch/
 .env
 dist/
 worker/assets.gen.mjs
+video/voices/
+video/raw/
+video/*.wav
+video/marks.json
+.venv*/
