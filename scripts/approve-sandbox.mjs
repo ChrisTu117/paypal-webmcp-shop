@@ -4,7 +4,7 @@
 import { chromium } from 'playwright'; import { createServer } from '../server.mjs';
 const EMAIL = process.env.PAYPAL_SANDBOX_BUYER_EMAIL, PW = process.env.PAYPAL_SANDBOX_BUYER_PASSWORD;
 if (!PW || !EMAIL) throw new Error('set PAYPAL_SANDBOX_BUYER_EMAIL and PAYPAL_SANDBOX_BUYER_PASSWORD');
-const srv = createServer().listen(+process.env.PORT || 8787); const base = `http://localhost:${srv.address().port}`;
+const LIVE = process.env.LIVE?.replace(/\/$/, ''); const srv = LIVE ? null : createServer().listen(+process.env.PORT || 8787); const base = LIVE || `http://localhost:${srv.address().port}`;
 const j = async (p, i) => { const r = await fetch(base + p, i); return { code: r.status, body: await r.json() }; };
 let id = process.argv[2], o = id && (await j('/api/orders/' + id)).body;
 if (!o || o.error || !['PAYER_ACTION_REQUIRED', 'CREATED', 'APPROVED'].includes(o.status)) {
@@ -27,12 +27,12 @@ try {
     await page.waitForSelector('#password', { state: 'visible', timeout: 30000 }); await stopIf();
     await page.fill('#password', PW); await page.click('#btnLogin');
     const pay = page.locator('#payment-submit-btn, [data-testid="submit-button-initial"], button:has-text("Complete Purchase"), button:has-text("Pay Now"), button:has-text("Continue to Review"), button:has-text("Continue")').first();
-    await Promise.race([pay.waitFor({ timeout: 60000 }), page.waitForURL(u => /^http:\/\/localhost/.test(u.href), { timeout: 60000 })]).catch(() => {});
+    await Promise.race([pay.waitFor({ timeout: 60000 }), page.waitForURL(u => u.href.startsWith(base), { timeout: 60000 })]).catch(() => {});
     await stopIf(); await shot('review');
-    if (/paypal\.com/.test(page.url())) { await pay.click(); await page.waitForURL(u => /^http:\/\/localhost/.test(u.href), { timeout: 60000 }).catch(e => { if (!/ERR_CONNECTION_REFUSED/.test(e.message)) throw e; }); }
+    if (/paypal\.com/.test(page.url())) { await pay.click(); await page.waitForURL(u => u.href.startsWith(base), { timeout: 60000 }).catch(e => { if (!/ERR_CONNECTION_REFUSED/.test(e.message)) throw e; }); }
     console.log('returned to', page.url().replace(/token=[^&]+/, 'token=…'));
     await page.waitForLoadState('domcontentloaded').catch(() => {}); await shot('returned-to-shop');
   }
   const st = (await j('/api/orders/' + id)).body; console.log('status after approval:', st.status);
   const cap = await j(`/api/orders/${id}/capture`, { method: 'POST' }); console.log('capture ->', cap.code, JSON.stringify(cap.body));
-} finally { await b.close(); srv.close(); }
+} finally { await b.close(); srv?.close(); }
