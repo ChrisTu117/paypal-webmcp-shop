@@ -24,7 +24,7 @@ test('paypal client refuses live host and builds correct order body', async () =
   assert.throws(() => makePayPal({ base: 'https://api-m.paypal.com' }), /non-sandbox/); const calls = [];
   const fetchImpl = async (u, i) => { calls.push([u, i]); return { json: async () => u.endsWith('token') ? { access_token: 'T', expires_in: 3600 } : { id: 'O1', status: 'CREATED', links: [{ rel: 'approve', href: 'https://x/approve' }] } }; };
   const o = await makePayPal({ clientId: 'a', secret: 'b', fetchImpl }).createOrder([{ id: 'oolong-100', name: 'Oolong', price: 12, qty: 2 }]);
-  assert.deepEqual(o, { order_id: 'O1', status: 'CREATED', approve_url: 'https://x/approve', total: undefined, environment: 'sandbox' });
+  assert.deepEqual(o, { order_id: 'O1', status: 'CREATED', approve_url: 'https://x/approve', total: undefined, environment: 'sandbox', create_time: undefined, items: [] });
   const body = JSON.parse(calls[1][1].body); assert.equal(body.purchase_units[0].amount.value, '24.00'); assert.equal(body.purchase_units[0].items[0].quantity, '2');
   assert.match(summarize({ name: 'INVALID_REQUEST' }).error, /INVALID/);
 });
@@ -52,4 +52,14 @@ test('"/" is injected, "/original" is untouched; static allowlist', async () => 
   const srv = createServer({ paypal: makeMockPayPal() }).listen(0); const base = `http://localhost:${srv.address().port}`;
   assert.match(await (await fetch(base + '/')).text(), /converter\/inject\.mjs/); assert.doesNotMatch(await (await fetch(base + '/original')).text(), /inject\.mjs/);
   assert.equal((await fetch(base + '/vendor/ag-grid-community.min.js')).status, 200); assert.equal((await fetch(base + '/package.json')).status, 404); srv.close();
+});
+test('order log: agent source + tools recorded, capture updates log, dashboard lists', async () => {
+  const pp = makeMockPayPal(); const srv = createServer({ paypal: pp }).listen(0); const base = `http://localhost:${srv.address().port}`;
+  const o = await (await fetch(base + '/api/orders', { method: 'POST', body: JSON.stringify({ lines: [{ id: 'jasmine-100', qty: 2 }], source: 'webmcp-agent', tools: ['search_products', 'add_to_cart', 'create_checkout', 'bad tool!'] }) })).json();
+  await fetch(base + '/api/orders', { method: 'POST', body: JSON.stringify({ lines: [{ id: 'oolong-100', qty: 1 }], source: 'evil' }) });
+  pp.approve(o.order_id); await fetch(`${base}/api/orders/${o.order_id}/capture`, { method: 'POST' });
+  const rows = await (await fetch(base + '/api/dashboard/orders')).json(); const a = rows.find(r => r.order_id === o.order_id);
+  assert.equal(rows.length, 2); assert.equal(a.status, 'COMPLETED'); assert.equal(a.source, 'webmcp-agent');
+  assert.deepEqual(a.tools, ['search_products', 'add_to_cart', 'create_checkout', 'capture_order']); assert.equal(a.items[0].qty, 2);
+  assert.equal(rows.find(r => r.order_id !== o.order_id).source, 'paypal-button'); assert.equal((await fetch(base + '/dashboard')).status, 200); srv.close();
 });

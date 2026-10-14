@@ -7,6 +7,7 @@ const G = [
  ['1-one-script-tag', shell('One script tag → agent-ready', 'Same PayPal shop. Original page: 0 WebMCP tools. With ShopBridge: 7 tools.', pic('r23.png', 820, '/original · 0 tools') + pic('r38.png', 820, '/ · 7 WebMCP tools'))],
  ['2-readiness-report', shell('Agent-readiness: 45 → 100', 'Both pages scanned live and scored in AG Grid', pic('r49.png', 1420))],
  ['3-agent-checkout', shell('AI agent orders via WebMCP', 'GLM-4.7-flash plans tool calls → PayPal Orders v2 (sandbox) → buyer approves on PayPal', pic('r75.png', 820, 'Agent calls page tools') + pic('r85.png', 820, 'Buyer approves (sandbox)'))],
+ ['5-merchant-dashboard', shell('Merchant dashboard', 'Every agent order with its WebMCP tool calls, live PayPal status, revenue · AG Grid + AG Charts', pic('dash.png', 1420))],
  ['4-captured', shell('Approved → captured → COMPLETED', 'capture_order only works after buyer approval · server-side pricing · sandbox only', pic('r95.png', 1420))],
 ];
 const b = await chromium.launch({ executablePath: '/usr/bin/google-chrome' }); const p = await b.newPage({ viewport: { width: 1800, height: 1200 } });

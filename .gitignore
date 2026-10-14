@@ -9,3 +9,4 @@ video/raw/
 video/*.wav
 video/marks.json
 .venv*/
+SUBMISSION-private.md

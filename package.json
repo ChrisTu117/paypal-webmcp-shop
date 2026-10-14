@@ -12,6 +12,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "ag-charts-community": "^11.3.2",
     "ag-grid-community": "^33.3.2",
     "playwright": "^1.64.0"
   },

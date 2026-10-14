@@ -1,6 +1,6 @@
 # ShopBridge — one script tag makes a small PayPal shop orderable by AI agents (WebMCP + PayPal)
 
-**Live demo:** https://paypal-webmcp-shop.sandbricks.workers.dev — [original shop](https://paypal-webmcp-shop.sandbricks.workers.dev/original) · [agent-ready shop](https://paypal-webmcp-shop.sandbricks.workers.dev/) · [readiness report](https://paypal-webmcp-shop.sandbricks.workers.dev/report)
+**Live demo:** https://paypal-webmcp-shop.sandbricks.workers.dev — [original shop](https://paypal-webmcp-shop.sandbricks.workers.dev/original) · [agent-ready shop](https://paypal-webmcp-shop.sandbricks.workers.dev/) · [readiness report](https://paypal-webmcp-shop.sandbricks.workers.dev/report) · [merchant dashboard](https://paypal-webmcp-shop.sandbricks.workers.dev/dashboard)
 Built for the PayPal AI Hackathon 2026. **PayPal sandbox only** — no real money moves.
 
 > **Implemented from public specs, no official onboarding.** We built this from PayPal's public WebMCP / Store Sync documentation and the public WebMCP spec (`document.modelContext.registerTool`). We do not have PayPal Store Sync onboarding, and this is not an official PayPal product.

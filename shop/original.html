@@ -5,7 +5,7 @@
 {"@type":"Product","sku":"puer-cake","name":"Aged Pu-erh Cake 357g","description":"2015 ripe pu-erh, earthy and smooth","offers":{"@type":"Offer","price":"38.00","priceCurrency":"USD","availability":"https://schema.org/InStock"}},
 {"@type":"Product","sku":"gaiwan","name":"Porcelain Gaiwan","description":"150ml white porcelain brewing bowl","offers":{"@type":"Offer","price":"16.00","priceCurrency":"USD","availability":"https://schema.org/OutOfStock"}}]}</script>
 <style>body{font-family:system-ui;max-width:860px;margin:2rem auto;color:#222}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}.card{border:1px solid #ddd;border-radius:10px;padding:1rem}#paypal-button{background:#ffc439;border:0;border-radius:20px;padding:.7rem 2rem;font-weight:700;cursor:pointer}#status{font-size:.85rem;color:#0070ba}</style></head>
-<body><h1>🍵 Lin's Tea Corner</h1><p>A tiny shop that already sells with PayPal. <a href="/original">Original page</a> · <a href="/">Agent-ready page</a> · <a href="/report">Readiness report</a></p>
+<body><h1>🍵 Lin's Tea Corner</h1><p>A tiny shop that already sells with PayPal. <a href="/original">Original page</a> · <a href="/">Agent-ready page</a> · <a href="/report">Readiness report</a> · <a href="/dashboard">Merchant dashboard</a></p>
 <div id="status">WebMCP: not loaded</div><div class="grid" id="products"></div>
 <h3>Cart</h3><pre id="cart">empty</pre><button id="paypal-button" data-paypal-button>Pay with PayPal (sandbox)</button>
 <script>
@@ -13,7 +13,7 @@ const cat=JSON.parse(document.querySelector('script[type="application/ld+json"]'
 const draw=()=>document.getElementById('cart').textContent=Object.keys(cart).length?JSON.stringify(cart):'empty';
 document.getElementById('products').innerHTML=cat.map(p=>`<div class=card><b>${p.name}</b><br><small>${p.description}</small><p>$${p.offers.price} ${/InStock/.test(p.offers.availability)?'':'<i>(sold out)</i>'}</p><button data-sku="${p.sku}">Add</button></div>`).join('');
 document.getElementById('products').onclick=e=>{const s=e.target.dataset.sku;if(s){cart[s]=(cart[s]||0)+1;draw()}};
-document.getElementById('paypal-button').onclick=async()=>{const lines=Object.entries(cart).map(([id,qty])=>({id,qty}));if(!lines.length)return;const o=await (await fetch('/api/orders',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({lines})})).json();if(o.approve_url)location.href=o.approve_url;else alert(JSON.stringify(o))};
+document.getElementById('paypal-button').onclick=async()=>{const lines=Object.entries(cart).map(([id,qty])=>({id,qty}));if(!lines.length)return;const o=await (await fetch('/api/orders',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({lines,source:'paypal-button'})})).json();if(o.approve_url)location.href=o.approve_url;else alert(JSON.stringify(o))};
 document.addEventListener('webmcp-shop-ready',e=>{const d=e.detail;document.getElementById('status').textContent=`WebMCP: ${d.registered?'registered':'API unavailable'} · ${d.tools.length} tools · readiness ${d.before.score} → ${d.after.score}`});
 </script>
 </body></html>

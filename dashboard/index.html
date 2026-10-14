@@ -1,0 +1,38 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Merchant dashboard · agent orders</title>
+<script src="/vendor/ag-grid-community.min.js"></script><script src="/vendor/ag-charts-community.min.js"></script>
+<style>body{font-family:system-ui;margin:1.5rem 2rem;color:#1a1a1a}h1{margin:.2rem 0}.kpis{display:flex;gap:1rem;margin:1rem 0}.kpi{flex:1;background:#f3f6fb;border-radius:10px;padding:.8rem 1rem}.kpi b{display:block;font-size:1.7rem;color:#003087}.charts{display:flex;gap:1rem;height:260px}.charts>div{flex:1;border:1px solid #e3e6ea;border-radius:10px}#grid{height:380px;margin-top:1rem}small{color:#666}</style></head><body>
+<h1>Lin's Tea Corner · Merchant dashboard</h1><small>Orders created through the shop (WebMCP agent or PayPal button), statuses fetched live from PayPal Orders v2 · <b>sandbox</b> · <a href="/">shop</a> · <a href="/report">readiness</a></small>
+<div class="kpis"><div class="kpi">Orders<b id="k-n">–</b></div><div class="kpi">Via AI agent<b id="k-a">–</b></div><div class="kpi">Captured revenue<b id="k-r">–</b></div><div class="kpi">Awaiting buyer approval<b id="k-p">–</b></div></div>
+<div class="charts"><div id="c-status"></div><div id="c-rev"></div><div id="c-items"></div></div>
+<div id="grid"></div>
+<script>
+const money = v => '$' + (+v || 0).toFixed(2);
+const amount = t => parseFloat(t) || 0;
+(async () => {
+  const rows = (await (await fetch('/api/dashboard/orders')).json()).map(r => ({ ...r, amount: amount(r.total), items_text: (r.items || []).map(i => `${i.qty}× ${i.name}`).join(', '),
+    tools_text: (r.tools || []).join(' → ') || (r.source === 'pre-log' ? '(agent order, before logging)' : ''), channel: r.source === 'paypal-button' ? 'PayPal button' : 'AI agent (WebMCP)', day: (r.created || '').slice(0, 10) }));
+  window.__dash = { n: rows.length };
+  const done = rows.filter(r => r.status === 'COMPLETED');
+  document.getElementById('k-n').textContent = rows.length;
+  document.getElementById('k-a').textContent = rows.filter(r => r.channel.startsWith('AI')).length;
+  document.getElementById('k-r').textContent = money(done.reduce((s, r) => s + r.amount, 0));
+  document.getElementById('k-p').textContent = rows.filter(r => ['PAYER_ACTION_REQUIRED', 'CREATED'].includes(r.status)).length;
+  agGrid.createGrid(document.getElementById('grid'), { rowData: rows, pagination: true, paginationPageSize: 20,
+    defaultColDef: { sortable: true, filter: true, resizable: true },
+    columnDefs: [
+      { field: 'created', headerName: 'Created', sort: 'desc', valueFormatter: p => p.value ? new Date(p.value).toLocaleString() : '—', width: 180 },
+      { field: 'order_id', headerName: 'PayPal order', width: 190 },
+      { field: 'status', width: 190, cellStyle: p => ({ color: p.value === 'COMPLETED' ? '#0a7d33' : p.value === 'APPROVED' ? '#b26a00' : '#555', fontWeight: 600 }) },
+      { field: 'amount', headerName: 'Amount', valueFormatter: p => money(p.value), width: 110 },
+      { field: 'channel', width: 170 }, { field: 'items_text', headerName: 'Items', flex: 1, minWidth: 220 },
+      { field: 'tools_text', headerName: 'Agent tool calls', flex: 1, minWidth: 260 }, { field: 'capture_id', headerName: 'Capture ID', width: 170 } ] });
+  const count = (arr, key) => Object.entries(arr.reduce((m, r) => (m[key(r)] = (m[key(r)] || 0) + 1, m), {}));
+  agCharts.AgCharts.create({ container: document.getElementById('c-status'), title: { text: 'Orders by status' }, data: count(rows, r => r.status).map(([status, n]) => ({ status, n })),
+    series: [{ type: 'donut', angleKey: 'n', calloutLabelKey: 'status', innerRadiusRatio: 0.6 }] });
+  const rev = Object.entries(done.reduce((m, r) => (m[r.day] = (m[r.day] || 0) + r.amount, m), {})).sort().map(([day, revenue]) => ({ day, revenue }));
+  agCharts.AgCharts.create({ container: document.getElementById('c-rev'), title: { text: 'Captured revenue by day (USD)' }, data: rev, series: [{ type: 'bar', xKey: 'day', yKey: 'revenue' }] });
+  const units = {}; for (const r of rows) for (const i of r.items || []) units[i.name] = (units[i.name] || 0) + i.qty;
+  agCharts.AgCharts.create({ container: document.getElementById('c-items'), title: { text: 'Units ordered by product' }, data: Object.entries(units).map(([p, u]) => ({ p, u })), series: [{ type: 'bar', direction: 'horizontal', xKey: 'p', yKey: 'u' }] });
+  window.__dash.ready = true;
+})();
+</script></body></html>
