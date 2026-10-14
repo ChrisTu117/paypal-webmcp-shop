@@ -1,147 +1,147 @@
 1
-00:00:00,150 --> 00:00:03,239
+00:00:00,150 --> 00:00:03,810
 Millions of small shops already sell with a PayPal button.
 
 2
-00:00:03,239 --> 00:00:05,635
+00:00:03,810 --> 00:00:06,649
 But AI shopping agents can't really use them.
 
 3
-00:00:05,635 --> 00:00:08,564
+00:00:06,649 --> 00:00:10,120
 They have to guess their way through buttons and forms.
 
 4
-00:00:08,564 --> 00:00:10,800
+00:00:10,120 --> 00:00:12,770
 ShopBridge fixes that with one script tag.
 
 5
-00:00:11,704 --> 00:00:15,875
+00:00:13,676 --> 00:00:18,897
 Here is Lin's Tea Corner, an ordinary little shop with PayPal checkout.
 
 6
-00:00:15,875 --> 00:00:19,694
+00:00:18,897 --> 00:00:23,676
 Ask Chrome's WebMCP API for tools on this page, and you get zero.
 
 7
-00:00:20,595 --> 00:00:23,850
+00:00:24,582 --> 00:00:28,068
 Now the same page with one ShopBridge script tag.
 
 8
-00:00:23,850 --> 00:00:27,371
+00:00:28,068 --> 00:00:31,838
 It reads the product data the shop already publishes,
 
 9
-00:00:27,371 --> 00:00:29,564
+00:00:31,838 --> 00:00:34,186
 and registers seven WebMCP tools:
 
 10
-00:00:29,564 --> 00:00:34,015
+00:00:34,186 --> 00:00:38,952
 search, product details, cart, checkout, order status, and capture.
 
 11
-00:00:34,920 --> 00:00:39,208
+00:00:39,859 --> 00:00:44,733
 The readiness report loads both pages live and scores them in AG Grid.
 
 12
-00:00:39,208 --> 00:00:41,413
+00:00:44,733 --> 00:00:47,240
 The original shop scores forty-five.
 
 13
-00:00:41,413 --> 00:00:43,250
+00:00:47,240 --> 00:00:49,329
 After conversion, one hundred.
 
 14
-00:00:44,151 --> 00:00:45,208
+00:00:50,234 --> 00:00:51,394
 Now an AI agent.
 
 15
-00:00:45,208 --> 00:00:46,001
+00:00:51,394 --> 00:00:52,265
 The request:
 
 16
-00:00:46,001 --> 00:00:48,841
+00:00:52,265 --> 00:00:55,383
 buy two bags of jasmine tea and one oolong.
 
 17
-00:00:48,841 --> 00:00:51,087
+00:00:55,383 --> 00:00:57,849
 GLM 4.7 Flash planned these calls,
 
 18
-00:00:51,087 --> 00:00:55,117
+00:00:57,849 --> 00:01:02,273
 and each one runs as a real WebMCP tool inside the live page.
 
 19
-00:00:55,117 --> 00:00:58,618
+00:01:02,273 --> 00:01:06,116
 We cut the model's thinking time from this recording.
 
 20
-00:00:58,618 --> 00:01:03,308
+00:01:06,116 --> 00:01:11,265
 The agent searches, fills the cart, and creates a PayPal sandbox order.
 
 21
-00:01:03,308 --> 00:01:04,893
+00:01:11,265 --> 00:01:13,006
 It never pays by itself.
 
 22
-00:01:04,893 --> 00:01:06,941
+00:01:13,006 --> 00:01:15,254
 It hands back an approval link.
 
 23
-00:01:07,847 --> 00:01:12,398
+00:01:16,158 --> 00:01:21,428
 The human buyer opens that link and approves the payment in the PayPal sandbox,
 
 24
-00:01:12,398 --> 00:01:13,608
+00:01:21,428 --> 00:01:22,829
 using a test account.
 
 25
-00:01:13,608 --> 00:01:15,625
+00:01:22,829 --> 00:01:25,164
 Everything in this demo is sandbox.
 
 26
-00:01:15,625 --> 00:01:16,777
+00:01:25,164 --> 00:01:26,498
 No real money moves.
 
 27
-00:01:17,678 --> 00:01:20,331
+00:01:27,398 --> 00:01:30,298
 Back in the shop, the order is now approved,
 
 28
-00:01:20,331 --> 00:01:22,683
+00:01:30,298 --> 00:01:32,868
 so the capture order tool completes it.
 
 29
-00:01:22,683 --> 00:01:23,105
+00:01:32,868 --> 00:01:33,330
 Status:
 
 30
-00:01:23,105 --> 00:01:25,638
+00:01:33,330 --> 00:01:36,098
 completed, with a real sandbox capture ID.
 
 31
-00:01:26,540 --> 00:01:31,880
+00:01:37,002 --> 00:01:42,675
 Under the hood, prices are always recomputed on the server from the shop's own catalog,
 
 32
-00:01:31,880 --> 00:01:35,011
+00:01:42,675 --> 00:01:46,000
 and the PayPal client refuses any non-sandbox host.
 
 33
-00:01:35,011 --> 00:01:38,325
+00:01:46,000 --> 00:01:49,521
 We built this from the public PayPal and WebMCP specs,
 
 34
-00:01:38,325 --> 00:01:40,719
+00:01:49,521 --> 00:01:52,064
 without official Store Sync onboarding.
 
 35
-00:01:40,719 --> 00:01:43,604
+00:01:52,064 --> 00:01:55,129
 Unlike AutoShop, a permission layer for agents,
 
 36
-00:01:43,604 --> 00:01:46,735
+00:01:55,129 --> 00:01:58,454
 ShopBridge retrofits shops that already use PayPal.
 
 37
-00:01:46,735 --> 00:01:49,190
+00:01:58,454 --> 00:02:01,062
 The code and live demo are linked below.
