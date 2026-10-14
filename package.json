@@ -1,0 +1,22 @@
+{
+  "name": "paypal-webmcp",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test test/",
+    "agent": "node agent.mjs",
+    "screenshots": "node shot.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "ag-grid-community": "^33.3.2",
+    "playwright": "^1.64.0"
+  },
+  "type": "module",
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}

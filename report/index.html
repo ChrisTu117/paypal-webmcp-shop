@@ -1,0 +1,27 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Agent-Readiness Report</title>
+<script src="/vendor/ag-grid-community.min.js"></script>
+<style>body{font-family:system-ui;margin:2rem}#grid{height:460px}.big{font-size:1.8rem;font-weight:700}iframe{display:none}small{color:#666}</style></head><body>
+<h1>Agent-Readiness Report</h1>
+<p>Before: <input id="before" value="/original" size="22"> After: <input id="after" value="/" size="22"> <button id="go">Scan</button>
+<small>(both pages are loaded live and scanned; tools are read from <code>document.modelContext.getTools()</code> when WebMCP is enabled)</small></p>
+<p class="big" id="score">Scanning…</p><div id="grid"></div>
+<script type="module">
+import { scanCatalog, readiness } from '/converter/core.mjs';
+let api;
+function load(src) { return new Promise(res => { const f = document.createElement('iframe'); f.src = src; document.body.append(f);
+  f.onload = async () => { const w = f.contentWindow, d = f.contentDocument; await new Promise(r => setTimeout(r, 400));
+    const mc = w.document.modelContext || w.navigator.modelContext; let tools = [], via = 'none';
+    if (mc?.getTools) { tools = (await mc.getTools()).map(t => ({ name: t.name })); via = 'WebMCP getTools()'; }
+    else if (w.__webmcpShop) { tools = w.__webmcpShop.tools.map(name => ({ name })); via = 'converter manifest (WebMCP flag off)'; }
+    const out = { catalog: scanCatalog(d), tools, via, hasPayPalButton: !!d.querySelector('[data-paypal-button],#paypal-button') }; f.remove(); res(out); }; }); }
+async function run() {
+  const B = await load(document.getElementById('before').value); const A = await load(document.getElementById('after').value);
+  const b = readiness(B), a = readiness(A);
+  document.getElementById('score').textContent = `Readiness ${b.score} → ${a.score} / 100 · ${A.catalog.length} products · after-tools ${A.tools.length} via ${A.via}`;
+  window.__report = { before: b.score, after: a.score, beforeTools: B.tools.length, afterTools: A.tools.length, via: A.via };
+  const rowData = b.rows.map((r, i) => ({ check: r.check, weight: r.weight, before: r.pass ? '✅' : '❌', after: a.rows[i].pass ? '✅' : '❌', gain: a.rows[i].points - r.points }));
+  if (api) api.setGridOption('rowData', rowData); else api = agGrid.createGrid(document.getElementById('grid'), { rowData,
+    columnDefs: [{ field: 'check', flex: 2 }, { field: 'weight' }, { field: 'before' }, { field: 'after' }, { field: 'gain', sort: 'desc' }], defaultColDef: { flex: 1, sortable: true, filter: true } });
+}
+document.getElementById('go').onclick = run; run();
+</script></body></html>

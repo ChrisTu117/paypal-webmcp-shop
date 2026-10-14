@@ -1,0 +1,6 @@
+node_modules/
+out/
+_scratch/
+.env
+dist/
+worker/assets.gen.mjs
