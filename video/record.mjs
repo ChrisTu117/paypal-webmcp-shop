@@ -41,18 +41,19 @@ await scene('s5', async () => { await page.goto(LIVE + '/'); await page.waitForF
 if (!order?.approve_url) throw new Error('no order');
 await scene('s6', async () => {
   // PayPal sometimes ignores the language switch for this CN sandbox buyer; retry with fresh cookies and keep only the final attempt in the cut.
-  for (let attempt = 1; ; attempt++) {
+  for (let attempt = 1; ; attempt++) { try {
     marks.at(-1).start = (Date.now() - t0) / 1000;
     await page.goto(order.approve_url + '&locale.x=en_US&country.x=US', { waitUntil: 'domcontentloaded' }); if (!/sandbox\.paypal\.com/.test(page.url())) throw new Error('not sandbox');
     await page.waitForSelector('#email, #password', { timeout: 45000 });
     const en = page.locator('a:has-text("English"), button:has-text("English")').first(); if (await en.count()) { await Promise.all([page.waitForNavigation({ timeout: 15000 }).catch(() => {}), en.click().catch(() => {})]); await sleep(1500); await page.waitForSelector('#email, #password', { timeout: 30000 }); }
     if (await page.isVisible('#email')) { await page.type('#email', EMAIL, { delay: 25 }); if (await page.isVisible('#btnNext')) await page.click('#btnNext'); }
     await page.waitForSelector('#password', { state: 'visible' }); await page.fill('#password', PW); await page.click('#btnLogin');
-    const pay = page.locator('#payment-submit-btn, [data-testid="submit-button-initial"]').first(); await pay.waitFor({ timeout: 60000 });
+    const pay = page.locator('#payment-submit-btn, [data-testid="submit-button-initial"]').first(); await pay.waitFor({ timeout: 35000 });
     const label = (await pay.innerText()).trim(); console.log('attempt', attempt, 'review button:', label);
     const vis = await page.innerText('body'); if (/captcha|one-time code|security code|card number/i.test(vis)) { await page.screenshot({ path: 'out/video-STOP.png' }); throw new Error('STOP challenge'); }
     if (!/[\u4e00-\u9fff]/.test(label) || attempt >= 6) { await sleep(2000); await pay.click(); break; }
-    await ctx.clearCookies();
+    } catch (e) { if (/STOP/.test(e.message) || attempt >= 6) throw e; console.log('attempt', attempt, 'failed:', e.message.split('\n')[0]); await page.screenshot({ path: `out/retry-fail-${attempt}.png` }).catch(() => {}); }
+    await ctx.clearCookies(); await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} }).catch(() => {});
   }
   await page.waitForURL(u => u.href.startsWith(LIVE), { timeout: 60000 }); });
 await scene('s7', async () => { await page.waitForFunction(() => window.__webmcpShop); await banner('Back in the shop', 'buyer approved on PayPal sandbox');
@@ -60,6 +61,9 @@ await scene('s7', async () => { await page.waitForFunction(() => window.__webmcp
   await ov(`<b>→ get_order_status</b>\n   ${st.order_id}: <b>${st.status}</b>\n`); await sleep(2500);
   const cap = await callTool('capture_order', { order_id: order.order_id });
   await ov(`\n<b>→ capture_order</b>\n   status <b>${cap.status}</b>\n   capture id <b>${cap.capture_id}</b>\n   ${cap.total} · ${cap.environment}`, true); order.capture = cap; });
+await scene('s7b', async () => { await page.goto(LIVE + '/dashboard'); await page.waitForFunction(() => window.__dash?.ready, null, { timeout: 30000 }); await banner('Merchant dashboard', 'AG Grid + AG Charts · live PayPal status');
+  await page.evaluate(() => { document.body.style.zoom = '0.72'; document.querySelector('.charts').style.height = '230px'; }); await sleep(4000); await page.evaluate(id => { const row = [...document.querySelectorAll('.ag-row')].find(r => r.textContent.includes(id)); if (row) row.style.outline = '3px solid #ffc439'; }, order.order_id);
+  await page.evaluate(() => document.querySelector('.ag-body-horizontal-scroll-viewport, .ag-center-cols-viewport')?.scrollBy({ left: 700, behavior: 'smooth' })); });
 await scene('s8', async () => { await card('Safe by design', ['✓ Server re-prices every order from the shop\'s own catalog', '✓ PayPal client refuses any non-sandbox host · agent never pays', '✓ Built from public PayPal + WebMCP specs (no official Store Sync onboarding)', '✓ vs AutoShop: retrofits existing PayPal shops, not a permission layer',
   '<br><b>github.com/ChrisTu117/paypal-webmcp-shop</b>', '<b>paypal-webmcp-shop.sandbricks.workers.dev</b>']); });
 const total = (Date.now() - t0) / 1000; const vpath = await page.video().path(); await ctx.close(); await b.close();

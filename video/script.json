@@ -49,6 +49,13 @@
   "dur": 9.6
  },
  {
+  "id": "s7b",
+  "title": "Merchant dashboard",
+  "text": "And the merchant sees it all. The new order shows up in the dashboard, labeled as an AI agent order, with the exact WebMCP tool calls that produced it. Live PayPal status, revenue, and charts, built with AG Grid and AG Charts.",
+  "audio": 15.74,
+  "dur": 16.64
+ },
+ {
   "id": "s8",
   "title": "Safe by design",
   "text": "Under the hood, prices are always recomputed on the server from the shop's own catalog, and the PayPal client refuses any non-sandbox host. We built this from the public PayPal and WebMCP specs, without official Store Sync onboarding. Unlike AutoShop, a permission layer for agents, ShopBridge retrofits shops that already use PayPal. The code and live demo are linked below.",
