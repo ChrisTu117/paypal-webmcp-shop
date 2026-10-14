@@ -9,7 +9,7 @@ One script tag makes any PayPal shop AI-agent-orderable   ← 55 chars
 ## Links
 - Live demo (hosted, free, no login): https://paypal-webmcp-shop.sandbricks.workers.dev  (`/original`, `/`, `/report`, `/dashboard`)
 - Code (public, MIT): https://github.com/ChrisTu117/paypal-webmcp-shop
-- Demo video (YouTube, public, 2:02): https://youtu.be/qPB2m5boZPQ
+- Demo video (YouTube, public, 2:02): https://youtu.be/wr9jTVVn1Ko
 
 ## Built with
 `paypal-orders-api-v2` `paypal-sandbox` `webmcp` `chrome` `javascript` `node.js` `cloudflare-workers` `playwright` `ag-grid` `ag-charts` `cloudflare-workers-kv` `glm-4.7-flash` `z.ai` `schema.org` `json-ld` `openai-function-calling` `kokoro-tts`
